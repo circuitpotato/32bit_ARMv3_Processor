@@ -19,15 +19,20 @@ end Clock_Enable;
 
 architecture Behavioral of Clock_Enable is
     -- threshold = (Freq_CLK / (2*Freq_desired )) - 1
-    constant threshold1: std_logic_vector(25 downto 0):= std_logic_vector(to_unsigned(500000,26));   -- 1 Hz, 50k is just a threshold for simulation
-    constant threshold2: std_logic_vector(25 downto  0):=std_logic_vector(to_unsigned(12499999,26));   -- 4 Hz 
+    -- 50000 for simulation
+    -- 49999999 for hardware
+    constant threshold_1Hz: std_logic_vector(25 downto 0):= std_logic_vector(to_unsigned(50000,26));   -- 1 Hz, 50k is just a threshold for simulation
     
-    signal threshold: std_logic_vector(25 downto 0):= threshold1;
+    signal threshold: std_logic_vector(25 downto 0):= threshold_1Hz;
     signal counter: std_logic_vector(25 downto 0):= (others  => '0');
 
 begin
     
+    -- flag enable when counter reaches threshold
     enable <= '1' when counter = threshold else '0';
+    
+    -- threshold shifted right by 2 bits to emulate 4Hz
+    threshold <= threshold_1Hz when btnU = '0' else "00" & threshold_1Hz(25 downto 2);  
     
     process (clk) begin
         if rising_edge(clk) then
@@ -36,11 +41,6 @@ begin
             else
                 if btnC = '0' then
                     counter <= std_logic_vector(unsigned(counter) + 1);
-                    if btnU = '0' then
-                        threshold <= threshold1;
-                    else
-                        threshold <= threshold2;
-                    end if;
                 end if;            
             end if;
         end if;

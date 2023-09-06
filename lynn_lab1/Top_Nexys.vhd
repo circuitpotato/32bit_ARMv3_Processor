@@ -71,12 +71,11 @@ begin
 -- Fetch memory content, using given module Get_MEM.vhd       
     my_memory: Get_MEM port map (clk => clk, enable => enable, data => data, upper_lower => upper_lower);
 
-
 -- Displays the 32-bit memory data on 7-segments, using given module Seven_Seg.v
 -- This module can be deleted if students do not want to implement the 7-segment display
     my_seven_segment: Seven_seg port map (clk => clk, data => data, anode => anode, dp => dp, cathode => cathode);
 
 -- split the 32-bit Memory data using a multiplexer to display on led
-    led(15 downto 0) <= data(31 downto 16) when upper_lower = '1' else data(15 downto 0);
+    led(15 downto 0) <= data(31 downto 16) when upper_lower = '0' else data(15 downto 0);   -- display MSB first
 
 end Behavioral;

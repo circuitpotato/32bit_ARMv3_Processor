@@ -27,54 +27,49 @@ architecture Behavioral of Get_MEM is
 	-- declare INSTR_MEM and DATA_CONST_MEM
     type MEM_128x32 is array (0 to 127) of std_logic_vector (31 downto 0); 
     
-    ----------------------------------------------------------------
-    -- Instruction Memory
-    ----------------------------------------------------------------
-  constant instr_mem : mem_128x32 := (
-    x"E59F11F8",
-    x"E59F21F8", 
-    x"E59F3214",
-    x"E5924000", 
-    x"E5814000", 
-    x"E2533001", 
-    x"1AFFFFFD",
-    x"EAFFFFF9",
-    x"E1A0100F",
-    x"E59F0200",
-    x"E58F57D0",
-    x"E59F57CC",
-    x"E59F21F0",
-    x"E5820000",
-    x"E5820004",
-    x"EAFFFFFE",
-    others => x"00000000"
-  );
-	
-    ----------------------------------------------------------------
-    -- Data (Constant) Memory
-    ----------------------------------------------------------------
-  constant data_const_mem : mem_128x32 := (
-    x"00000C00",
-    x"00000C04", 
-    x"00000C08", 
-    x"00000C0C", 
-    x"00000C10",
-    x"00000C14",
-    x"00000C18",
-    x"00000000",
-    x"000000FF",
-    x"00000002",
-    x"00000800",
-    x"ABCD1234",
-    x"65570A0D",
-    x"6D6F636C",
-    x"6F742065",
-    x"33474320",
-    x"2E373032",
-    x"000A0D2E",
-    x"00000230",
-    others => x"00000000"
-  );
+----------------------------------------------------------------
+-- Instruction Memory
+----------------------------------------------------------------
+constant INSTR_MEM : MEM_128x32 := (		x"E59F11F8", 
+											x"E59F21F8", 
+											x"E59F3214", 
+											x"E5924000", 
+											x"E5814000", 
+											x"E2533001", 
+											x"1AFFFFFD", 
+											x"E1A0100F", 
+											x"E59F0204", 
+											x"E58F57D4", 
+											x"E59F57D0", 
+											x"E59F21F4", 
+											x"E5820000", 
+											x"E5820004", 
+											x"EAFFFFFE", 
+											others => x"00000000");
+
+----------------------------------------------------------------
+-- Data (Constant) Memory
+----------------------------------------------------------------
+constant DATA_CONST_MEM : MEM_128x32 := (	x"00000C00", 
+											x"00000C04", 
+											x"00000C08", 
+											x"00000C0C", 
+											x"00000C10", 
+											x"00000C14", 
+											x"00000C18", 
+											x"00000000", 
+											x"000000FF", 
+											x"00000002", 
+											x"00000800", 
+											x"ABCD1234", 
+											x"65570A0D", 
+											x"6D6F636C", 
+											x"6F742065", 
+											x"33474320", 
+											x"2E373032", 
+											x"000A0D2E", 
+											x"00000230", 
+											others => x"00000000");
 
 	
 begin
@@ -83,7 +78,7 @@ begin
     upper_lower <= addr(0);
 
 -- determine corresponding memory data that should be displayed on 7-segments
-    data(31 downto 0) <= instr_mem(to_integer(unsigned(addr(7 downto 1)))) when addr(8) = '1' else data_const_mem(to_integer(unsigned(addr(7 downto 1))));
+    data(31 downto 0) <= instr_mem(to_integer(unsigned(addr(7 downto 1)))) when addr(8) = '0' else data_const_mem(to_integer(unsigned(addr(7 downto 1))));
         
 
 -- determine memory index "addr" accordingly

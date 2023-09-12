@@ -53,14 +53,14 @@ end Decoder;
 architecture Decoder_arch of Decoder is
 	signal ALUOp 			: std_logic;
 	signal Branch 			: std_logic;
-	
-	
+	signal RegW_signal      : std_logic;
+	signal Rd_15            : std_logic;
 	--<extra signals, if any>
 begin
 
 --<decoding logic here>
+	-- Main Decoder
     Branch <= '1' when (Op = "10") else '0';
-    PCS <= '1' when (Rd = "1111" and RegW = '1') or Branch = '1' else '0';
     
     MemtoReg <= '1' when (Op = "01" and Funct(0)= '1') else 
                 '-' when (Op = "01" and Funct(0) = '0') else '0'; 
@@ -73,12 +73,28 @@ begin
                "01" when (Op = "01") else
                "--" when (Op = "00" and Funct(5) = '0') else "10";
     
-    RegW <= '0' when ((Op = "01" and Funct(0) = '0') or (Op = "10")) else '1';
+    RegW_signal <= '0' when ((Op = "01" and Funct(0) = '0') or (Op = "10")) else '1';
+    RegW <= RegW_signal;
     
     RegSrc(0) <= '1' when (Op = "10") else '0';
     RegSrc(1) <= '0' when (Op = "00" and Funct(5) = '0') else
                  '1' when (Op = "01" and Funct(0) = '0') else '-';  
-                
+        
     ALUOp <= '1' when (Op = "00") else '0';
     
+	-- PC Logic
+
+	--PCS <= '1' when ((Rd = "1111" and RegW = '1') or (Branch = '1')) else '0';
+    Rd_15 <= '1' when (Rd = "1111") else '0';
+    PCS <= (Rd_15 and RegW_signal) or Branch;
+
+    
+	-- Alu Decoder
+	ALUControl <= "01" when ((ALUOp = '1') and Funct(4 downto 1) = "0010") else
+			      "10" when ((ALUOp = '1') and Funct(4 downto 1) = "0000") else
+			      "11" when ((ALUOp = '1') and Funct(4 downto 1) = "1100") else 
+			      "00";    		      
+	
+	FlagW(1) <= '1' when (Funct(0) = '1' and ALUOp = '1') else '0';
+	FlagW(0) <= '1' when (Funct(0) = '1' and (Funct(4 downto 1) = "0100" or Funct(4 downto 1) = "0010")) else '0';			 
 end Decoder_arch;

@@ -51,11 +51,10 @@ entity Decoder is port(
 end Decoder;
 
 architecture Decoder_arch of Decoder is
-	signal ALUOp 			: std_logic;
+	signal ALUOp 			: std_logic_vector(1 downto 0);
 	signal Branch 			: std_logic;
-	signal RegW_signal      : std_logic;
-	signal Rd_15            : std_logic;
 	--<extra signals, if any>
+	signal RegW_internal      : std_logic;
 begin
 
 --<decoding logic here>
@@ -73,28 +72,42 @@ begin
                "01" when (Op = "01") else
                "--" when (Op = "00" and Funct(5) = '0') else "10";
     
-    RegW_signal <= '0' when ((Op = "01" and Funct(0) = '0') or (Op = "10")) else '1';
-    RegW <= RegW_signal;
+    RegW_internal <= '0' when ((Op = "01" and Funct(0) = '0') or (Op = "10")) else '1';
+    RegW <= RegW_internal;
     
     RegSrc(0) <= '1' when (Op = "10") else '0';
     RegSrc(1) <= '0' when (Op = "00" and Funct(5) = '0') else
                  '1' when (Op = "01" and Funct(0) = '0') else '-';  
         
-    ALUOp <= '1' when (Op = "00") else '0';
+    --ALUOp <= '1' when (Op = "00") else '0';
+    ALUOp <= "01" when (Op = "00") else                         -- DP instruct
+             "10" when (Op = "01" and Funct(3) = '1') else      -- LDR/STR +ve offset
+             "11" when (Op = "01" and Funct(3) = '0') else      -- LDR/STR -ve offset 
+             "00";
+             
+    
     
 	-- PC Logic
+	PCS <= '1' when ((Rd = "1111" and RegW_internal = '1') or (Branch = '1')) else '0';
 
-	--PCS <= '1' when ((Rd = "1111" and RegW = '1') or (Branch = '1')) else '0';
-    Rd_15 <= '1' when (Rd = "1111") else '0';
-    PCS <= (Rd_15 and RegW_signal) or Branch;
-
-    
 	-- Alu Decoder
-	ALUControl <= "01" when ((ALUOp = '1') and Funct(4 downto 1) = "0010") else
-			      "10" when ((ALUOp = '1') and Funct(4 downto 1) = "0000") else
-			      "11" when ((ALUOp = '1') and Funct(4 downto 1) = "1100") else 
-			      "00";    		      
+--	ALUControl <= "01" when ((ALUOp = '1') and (Funct(4 downto 1) = "0010" or Funct(4 downto 1) = "1010")) else
+--			      "10" when ((ALUOp = '1') and Funct(4 downto 1) = "0000") else
+--			      "11" when ((ALUOp = '1') and Funct(4 downto 1) = "1100") else 
+--			      "00";    		
+    ALUControl <= "01" when ((ALUOp = "11" and Funct(3) = '0') or (ALUOp = "01" and (Funct(4 downto 1) = "0010" or Funct(4 downto 1) = "1010"))) else
+                  "10" when (ALUOp = "01" and Funct(4 downto 1) = "0000") else
+                  "11" when (ALUOp = "01" and Funct(4 downto 1) = "1100") else
+                  "00";
+                  
+    
 	
-	FlagW(1) <= '1' when (Funct(0) = '1' and ALUOp = '1') else '0';
-	FlagW(0) <= '1' when (Funct(0) = '1' and (Funct(4 downto 1) = "0100" or Funct(4 downto 1) = "0010")) else '0';			 
+	--FlagW(1) <= '1' when (Funct(0) = '1' and ALUOp = '1') else '0';
+	--FlagW(0) <= '1' when (Funct(0) = '1' and (Funct(4 downto 1) = "0100" or Funct(4 downto 1) = "0010" or Funct(4 downto 1) = "1010" or Funct(4 downto 1) = "1011")) else '0';		
+    FlagW(1) <= '1' when (Funct(0) = '1' and ALUOp = "01") else '0';
+    FlagW(0) <= '1' when (Funct(0) = '1' and (Funct(4 downto 1) = "0100" or Funct(4 downto 1) = "0010" or Funct(4 downto 1) = "1010" or Funct(4 downto 1) = "1011")) else '0';
+    
+    --NoWrite <= '1' when (ALUOp = '1' and (Funct(4 downto 1) = "1010" or (Funct(4 downto 1) = "1011")) and Funct(0) = '1') else '0';
+    NoWrite <= '1' when (ALUOp = "01" and (Funct(4 downto 0) = "10101" or Funct(4 downto 0) = "10111")) else '0';
+    
 end Decoder_arch;

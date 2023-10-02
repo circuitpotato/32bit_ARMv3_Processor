@@ -21,21 +21,21 @@
 ; ------- <code memory (ROM mapped to Instruction Memory) begins>
 ; Total number of instructions should not exceed 127 (126 excluding the last line 'halt B halt').
 
-main1
+
 		;R9,R10,R11 to hold values for DP operations
 		LDR R9, Calc_val1		;R9 = 0x0000000A
 		LDR R10, Calc_val2		;R10 = 0x00000008
 		LDR R11, Calc_val3		;R11 = 0x80000000
+		LDR R7, ZERO 			;R7 = 0x00000000
 		
-		LDR R7, ZERO 
-		LDR R0, DIPS
-		LDR R2, [R0]
-		
+		LDR R5, DIPS			;R0 = 0x00000C04
+main		
+		LDR R2, [R5]			;Check DIPS STATUS if SW1 is flipped?
 		CMP R2, R7
-		BEQ main1
+		BEQ main
 		
 ;This branch showcases our processor's ability to: LDR/STR with Positive & Negative offset, DP Src2 imm operation 
-Basic_operations
+;Basic_operations
 		;LDR
 		LDR R6, ZERO			;R6 = 0x00000000	;R6 init to 0
 		LDR R8, Delay			;R8 = 0x00000005	;Reset Delay value when Looped back into this branch
@@ -47,10 +47,7 @@ Basic_operations
 		;DP Src2 imm operation
 		SUB R1, #8				;R1 = 0x00000C14
 		;STR with Positive offset
-		STR R10, [R1, #4]		;7Seg = 0x00000008
-		
-		;Branch to more DP operations
-		; DP_operations
+		STR R10, [R1, #4]		;7Seg = 0x00000008	;looking at 0xC18 address which is 7seg addr
 		
 ;DP_operations
 		;Setting Up Registers for DP operations
@@ -82,27 +79,24 @@ Basic_operations
 		ORR R6, R9, R10
 		STR R6, [R1]			;7seg = 0x0000000A
 		
-		;Branch to CMP + CMN Operations
-		;B Cmp_op1
-
 ;CMP + CMN Operations
 ;Cmp_op1	;Using Z flag
 		CMP R9, R9
 		BEQ Cmp_flagup
-		B Exit
+		B Exit					; exit condition in case it fails --> just for completeness
 Cmp_flagup
 		LDR R6, Cmp_flag
 		STR R6, [R1]			;7seg = 0xAAAAAAAA
-		;B Cmp_op2
+
 
 ;Cmp_op2	;Using Z flag
 		CMP R9, R10
-		BNE Cmp_flagdown
+		BNE Cmp_flagdown		
 		B Exit
 Cmp_flagdown
 		LDR R6, Cmp_noflag
 		STR R6, [R1] 			;7seg = 0xBBBBBBBB
-		;B Cmn_op1	
+	
 		
 ;Cmn_op1	;Using N flag
 		CMN R9, R11
@@ -111,7 +105,7 @@ Cmp_flagdown
 Cmn_flagup
 		LDR R6, Cmn_flag
 		STR R6, [R1] 			;7seg = 0xCCCCCCCC
-		;B Cmn_op2
+	
 		
 ;Cmn_op2 ;Using N flag
 		CMN R9, R10
@@ -127,7 +121,7 @@ End_loop
 		STR R8, [R1]			;7seg = 0x0000000[5,4,3,2,1]
 		;SUBS not uses, Combination of CMP + SUB to carry out SUBS function
 		CMP R8, #1
-		SUB r8, #1
+		SUB R8, #1
 		BNE End_loop
 		
 		B End_display

@@ -67,10 +67,37 @@ module MCycle
     reg sign_op2 = 0;
     reg [2*width-1:0] temp_sum_signed = 0;
     reg signed_divide = 0;
-
-    // If operation is signed, find the binary representation of the twos complement representations of the operands.
-    wire [width-1:0] Operand1 = (~MCycleOp[0]) ? _Operand1[width-1] == 1'b1 ? (~_Operand1 + 1'b1) : _Operand1 : _Operand1;
-    wire [width-1:0] Operand2 = (~MCycleOp[0]) ? _Operand2[width-1] == 1'b1 ? (~_Operand2 + 1'b1) : _Operand2 : _Operand2;
+    
+    reg [width-1:0] Operand1;
+    reg [width-1:0] Operand2; 
+    
+    always @ (*) begin
+        if (MCycleOp[0] == 0) begin     // signed operation
+            if (_Operand1[width - 1] == 1'b1) begin
+                // If the MSB of _Operand1 is 1 (negative), apply two's complement by inverting and adding 1
+                Operand1 = ~_Operand1 + 1'b1;
+                
+            end 
+            else begin                  // unsigned operation 
+                // If the MSB of _Operand1 is 0 (positive), keep Operand1 as it is
+                Operand1 = _Operand1;
+            end
+            
+            if (_Operand2[width - 1] == 1'b1) begin
+                Operand2 = ~_Operand2 + 1'b1;        
+            end 
+            else begin 
+                Operand2 = _Operand2;
+            end 
+            
+        end else begin
+            // If MCycleOp[0] is equal to 1 (indicating an unsigned operation), Operand1 remains unchanged
+            Operand1 = _Operand1;
+            Operand2 = _Operand2; 
+            
+        end
+    end 
+     
     always@( state, done, Start, RESET ) begin : IDLE_PROCESS  
 		// Note : This block uses non-blocking assignments to get around an unpredictable Verilog simulation behaviour.
         // default outputs
@@ -182,9 +209,14 @@ module MCycle
         sign_op1 = _Operand1[width - 1];
         sign_op2 = _Operand2[width - 1];
         
-        // Sets Results depending on the necessary conditions for signed divide resulting in negative answer.
-        Result2 <= (~MCycleOp[0]) ? temp_sum_signed[2*width-1 : width] : temp_sum[2*width-1 : width];
-        Result1 <= (~MCycleOp[0]) ? temp_sum_signed[width-1 : 0] : temp_sum[width-1 : 0] ;    
+        if (~MCycleOp[0]) begin     // signed operation 
+            Result1 = temp_sum_signed[width - 1 : 0]; //assign the LSB to Result1 from temp_sum_signed
+            Result2 = temp_sum_signed[2 * width - 1 : width]; // assign the MSB to Result2 from temp_sum_signed
+        end else begin              // unsigned operation 
+            Result1 = temp_sum[width - 1 : 0];      // assign the LSB to Result1 from temp_sum          
+            Result2 = temp_sum[2 * width - 1 : width];  // assign the MSB to Result2 from temp_sum
+        end
+     
     end
    
 endmodule

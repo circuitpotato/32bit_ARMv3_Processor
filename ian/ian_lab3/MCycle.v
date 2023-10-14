@@ -34,7 +34,7 @@
 
 module MCycle
 
-    #(parameter width = 4) // Keep this at 4 to verify your algorithms with 4 bit numbers (easier). When using MCycle as a component in ARM, generic map it to 32.
+    #(parameter width = 32) // Keep this at 4 to verify your algorithms with 4 bit numbers (easier). When using MCycle as a component in ARM, generic map it to 32.
     (
         input CLK,
         input RESET, // Connect this to the reset of the ARM processor.
@@ -62,10 +62,32 @@ module MCycle
     reg [2*width-1:0] shifted_op1 = 0 ;
     reg [2*width-1:0] shifted_op2 = 0 ;     
    
-   //ADDED//
+   //ADDED - For Both MCycle & Improved MCycle//
    reg Div_signed = 0;
    reg Neg_Op1 = 0;
    reg Neg_Op2 = 0;
+   
+  //ADDED - Improved MCycle -> Combinational Logic (Increase Hardware) to Cut cycles by up to n/2 cycles//
+  //operand1_1, operand1_2 -> Multiplicant Left bit shift by 1 bit and by 2 bits 
+  wire [2*width-1 : 0] operand1_1 = { shifted_op1[2*width-2 : 0], 1'b0 };       
+  wire [2*width-1 : 0] operand1_2 = { shifted_op1[2*width-3 : 0], 2'b00 };      
+  //operand2_1, operand2_2 -> Multiplier Right bit shift by 1 and by 2 bits
+  wire [2*width-1 : 0] operand2_1 = { 1'b0, shifted_op2[2*width-1 : 1] };       
+  wire [2*width-1 : 0] operand2_2 = { 2'b00, shifted_op2[2*width-1 : 2] };     
+  //Determinine if LSB of Multiplier Op2 is 1 or 0 -> if 1 = Op1 taken as is, if 0, Check 2nd LSB if 1 or 0, if 1 take bit shifted Op1
+  wire [2*width-1 : 0] next_value = shifted_op2[0] ? shifted_op1 : shifted_op2[1] ? operand1_1 : 0;
+ //Compute new Sum
+  wire [2*width-1 : 0] update_sum = temp_sum + next_value;
+  //Update Op1 and Op2 based on the already shifted value of Op1 and Op2
+  //next_operand is op1 bit shifted by 1 if op2 LSB was 1, if op2 is 0 return op1, 
+  //else it would have mean 2nd LSB was 1 and next op1 is bit shifted twice
+  //Similar logic for Op2
+  wire [2*width-1 : 0] next_operand1 = shifted_op2[0] ? operand1_1 : 
+                                       shifted_op2 == 0? shifted_op1 :
+                                       operand1_2;
+  wire [2*width-1 : 0] next_operand2 = shifted_op2[0] ? operand2_1 : 
+                                       shifted_op2 == 0? shifted_op2 :
+                                       operand2_2;
   
     always@( state, done, Start, RESET ) begin : IDLE_PROCESS  
 		// Note : This block uses non-blocking assignments to get around an unpredictable Verilog simulation behaviour.
@@ -113,52 +135,91 @@ module MCycle
             
             else begin
             shifted_op1 = { {width{~MCycleOp[0] & Operand1[width-1]}}, Operand1 } ; // sign extend the operand
-            shifted_op2 = { {width{~MCycleOp[0] & Operand2[width-1]}}, Operand2 } ; 
+            shifted_op2 = { {
+            width{~MCycleOp[0] & Operand2[width-1]}}, Operand2 } ; 
             end
         end 
-    
-        //Multiply---------------------------------------------------------------------------------------------------------------------
-        //Sequential Multiplier - Slide 19
-        else if( ~MCycleOp[1] ) begin // Multiply
-            // if( ~MCycleOp[0] ), takes 2*'width' cycles to execute, returns signed(Operand1)*signed(Operand2)
-            // if( MCycleOp[0] ), takes 'width' cycles to execute, returns unsigned(Operand1)*unsigned(Operand2)        
-            
-            //shifted_op2[0] is the multiplier Every cycle we check LSB of the Multiplier if 1, we add shifted Multiplicand
-            if( shifted_op2[0] ) // add only if b0 = 1
-                temp_sum = temp_sum + shifted_op1 ; // partial product for multiplication
-            
-            //Here we bit right bit shift Op2 by 1 (Added 0 to MSB), left bit shift Op1 (Added 0 to LSB)
-            shifted_op2 = {1'b0, shifted_op2[2*width-1 : 1]} ;
-            shifted_op1 = {shifted_op1[2*width-2 : 0], 1'b0} ;    
-            
-            //Track if Multiplication Completed
-            if( (MCycleOp[0] & count == width-1) | (~MCycleOp[0] & count == 2*width-1) ) // last cycle?
-                done <= 1'b1 ;   
-               
-            count = count + 1;    
-        end    
         
-        //Division--------------------------------------------------------------------------------------------------------------
+        //Pre Processing---------------------------------------------------------------------------------------------------------------------
         //Slide 24 - Conversion of Negative Operands to Positives before division -> Negate Result if Orignal Operands Different signs
         else if ( ~MCycleOp[0] & !Div_signed ) begin                       //Check if Sign Division Selected -> Serves as intermediate step for Sign Div
-            if (shifted_op1[width-1] == 1) begin                           //Op1 Dividend
-                Neg_Op1 = 1;
-                shifted_op1 = shifted_op1 - 1;
-                shifted_op1 = { {width{1'b0}}, ~shifted_op1[width-1:0] };
-                //shifted_op1 = ~(shifted_op1 - 1);                          //Negating Op1 - 2's Complement by -1 from original and flipping bits Dividend 0000...Dividend bits
-                Div_signed = 1;
-            end
-            if (shifted_op2[width-1] == 1) begin                           //Op2 Divisor NEG
-                Neg_Op2 = 1;
-                shifted_op2 = shifted_op2 - 1;                             //Negating Op2 - 2's Complement by -1 from original (will flip in next step)
-                shifted_op2 = { ~shifted_op2[width-1:0], {width{1'b0}} };  //Flip Op2 (2's Complement), Divisor bits...0000
-                Div_signed = 1;
-            end
-            else begin 
-                shifted_op2 = { Operand2, {width{1'b0}} };                 //Op2 Divisor POS Divisor bits...0000
-            end            
+            //FOR MULTIPLICATION
+            if (MCycleOp[1] == 0) begin
+                if (shifted_op1[width-1] == 1) begin 
+                    Neg_Op1 = 1;
+                    shifted_op1 = ~(shifted_op1 - 1);                              //Negating Op1 - 2's Complement by -1 from original, Flip Op1             
+                    Div_signed = 1;
+                end
+                if (shifted_op2[width-1] == 1) begin 
+                    Neg_Op2 = 1;
+                    shifted_op2 = ~(shifted_op2 - 1);                              //Negating Op2 - 2's Complement by -1 from original, Flip Op2                 
+                    Div_signed = 1;
+                end
+            end    
+            //FOR DIVISION
+            else begin
+                if (shifted_op1[width-1] == 1) begin                           //Op1 Dividend
+                    Neg_Op1 = 1;
+                    shifted_op1 = shifted_op1 - 1;                              //Negating Op1 - 2's Complement by -1 from original  (will flip in next step)
+                    shifted_op1 = { {width{1'b0}}, ~shifted_op1[width-1:0] };   //Flip Op1 (2's Complement), 0000...Dividend bits                      
+                    Div_signed = 1;
+                end
+                if (shifted_op2[width-1] == 1) begin                           //Op2 Divisor NEG
+                    Neg_Op2 = 1;
+                    shifted_op2 = shifted_op2 - 1;                             //Negating Op2 - 2's Complement by -1 from original (will flip in next step)
+                    shifted_op2 = { ~shifted_op2[width-1:0], {width{1'b0}} };  //Flip Op2 (2's Complement), Divisor bits...0000
+                    Div_signed = 1;
+                end
+                else begin 
+                    shifted_op2 = { Operand2, {width{1'b0}} };                 //Op2 Divisor POS Divisor bits...0000
+                end      
+            end        
         end
-        //Unsigned Division - Done when it is truly Unsigned Div, or once some preprocessing is Done on Signed Div values then Divide using Unsigned
+        
+        //Multiply---------------------------------------------------------------------------------------------------------------------
+        //THIS WAS THE ORIGINAL GIVEN MULTIPLIER//
+        //Sequential Multiplier - Slide 19
+//        else if( ~MCycleOp[1] ) begin // Multiply
+//            // if( ~MCycleOp[0] ), takes 2*'width' cycles to execute, returns signed(Operand1)*signed(Operand2)
+//            // if( MCycleOp[0] ), takes 'width' cycles to execute, returns unsigned(Operand1)*unsigned(Operand2)        
+            
+//            //shifted_op2[0] is the multiplier Every cycle we check LSB of the Multiplier if 1, we add shifted Multiplicand
+//            if( shifted_op2[0] ) // add only if b0 = 1
+//                temp_sum = temp_sum + shifted_op1 ; // partial product for multiplication
+            
+//            //Here we bit right bit shift Op2 by 1 (Added 0 to MSB), left bit shift Op1 (Added 0 to LSB)
+//            shifted_op2 = {1'b0, shifted_op2[2*width-1 : 1]} ;
+//            shifted_op1 = {shifted_op1[2*width-2 : 0], 1'b0} ;    
+            
+//            //Track if Multiplication Completed
+//            if( (MCycleOp[0] & count == width-1) | (~MCycleOp[0] & count == 2*width-1) ) // last cycle?
+//                done <= 1'b1 ;   
+               
+//            count = count + 1;    
+//        end    
+          
+          //NEW MULTIPLIER USING COMBINATIONAL LOGIC TO CONSIDER 2 LSB WORTH OF MULTIPLIER
+        else if( ~MCycleOp[1] ) begin // Multiply
+            //Update Values from Combinational Circuit
+            shifted_op1 <= next_operand1;
+            shifted_op2 <= next_operand2;
+            temp_sum <= update_sum;
+            //Once op1 and op2 (multiplicand and multiplier) are 0, done is set to 1
+            done <= !(next_operand1 && next_operand2);
+            //when not done -> flags are not cleared, once done -> flags cleared
+            if (!done) begin
+                Div_signed <= Div_signed;
+                Neg_Op1 <= Neg_Op1;
+                Neg_Op2 <= Neg_Op2;
+            end
+            else begin
+                Div_signed <= 0;
+                Neg_Op1 <= 0;
+                Neg_Op2 <= 0;
+            end
+        end
+        
+        //Division--------------------------------------------------------------------------------------------------------------
         else if (MCycleOp[0] | Div_signed) begin
             //When Dividend < Divisor -> Quotient is 0, Remainder(Divident) does not change till Division is carried out
             if (shifted_op1 < shifted_op2) begin                          
@@ -188,12 +249,12 @@ module MCycle
         //Results--------------------------------------------------------------------------------------------------------------
         //Logic here is: Negate result if Operands were of Different Signs
         if (Neg_Op1 != Neg_Op2) begin
-            Result2 <= ~temp_sum[2*width-1 : width] + 1;
-            Result1 <= ~temp_sum[width-1 : 0] + 1 ;
+            Result2 = ~temp_sum[2*width-1 : width] + 1;
+            Result1 = ~temp_sum[width-1 : 0] + 1 ;
         end
         else begin
-            Result2 <= temp_sum[2*width-1 : width] ;
-            Result1 <= temp_sum[width-1 : 0] ;
+            Result2 = temp_sum[2*width-1 : width] ;
+            Result1 = temp_sum[width-1 : 0] ;
         end   
     end
    

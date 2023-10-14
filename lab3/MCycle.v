@@ -148,10 +148,9 @@ module MCycle
         end 
         
         done <= 1'b0 ;   
-        
         if( ~MCycleOp[1] ) begin // Multiply
    
-            if( shifted_op2[0] ) // add only if b0 = 1
+            if( shifted_op2[0] == 1) // add only if b0 = 1
                 shifted_op2[2*width-1:width] = shifted_op2[2*width-1:width] + shifted_op1_mul ; // partial product for multiplication
             
             shifted_op2 = {1'b0, shifted_op2[2*width-1 : 1]} ; // Shift op2 to right by one bit   
@@ -159,7 +158,7 @@ module MCycle
             if( count == width-1) 
                 done <= 1'b1 ;   
                 
-            temp_sum = shifted_op2;
+            temp_sum = shifted_op2; 
             
             
             if (sign_op1 ^ sign_op2) begin // If sign_op1 XOR sign_op2 is true (one of them is 1), perform two's complement negation
@@ -192,8 +191,8 @@ module MCycle
             
             
             if (sign_op1 ^ sign_op2) begin  
-                temp_sum_signed[width-1:0] = ~temp_sum[2*width-1: width] + 1'b1;    // quotient calculation
-                temp_sum_signed[2*width-1:width] = (sign_op1 ^ sign_op2);           // remainder calculation 
+                temp_sum_signed[width-1:0] = ~temp_sum[width-1:0] + 1'b1;           // quotient calculation
+                temp_sum_signed[2*width-1:width] =  ~temp_sum[2*width-1:width] + 1'b1;           // remainder calculation 
             end 
             else begin
                 temp_sum_signed[width-1:0] = temp_sum[width-1:0];   // quotient calculation

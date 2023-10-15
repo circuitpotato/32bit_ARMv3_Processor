@@ -120,6 +120,7 @@ begin
     NoWrite <= '1' when (ALUOp = "01" and (Funct(4 downto 0) = "10101" or Funct(4 downto 0) = "10111")) else '0';
     
     --MUL Operation 
+    
     Start_buffer <= '1' when (MULFlag = "1001" and Op = "00") else '0'; 
     RegSrcMul <= "11" when Start_buffer = '1' else "00";
 

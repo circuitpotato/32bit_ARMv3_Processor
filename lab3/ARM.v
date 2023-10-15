@@ -254,10 +254,11 @@ module ARM(
     
     // Register File
     // Edited A1, A2 and A3 for Lab 3
-    assign A1 = RegSrc[0] == 1'b0 ? RegSrcMul[0] == 1'b1 ? Instr[11:8] : Instr[19:16] : 4'b1111;
+    assign A1 = (Start == 1'b1) ? Instr[11:8] : ((RegSrc[0] == 1'b0) ? Instr[19:16] : 4'b1111);
+    //assign A1 = RegSrc[0] == 1'b0 ? RegSrcMul[0] == 1'b1 ? Instr[11:8] : Instr[19:16] : 4'b1111;
     assign A2 = RegSrc[1] == 1'b0 ? Instr[3:0] : Instr[15:12];
-    assign A3 = RegSrcMul[1] == 1'b1 ? Instr[19:16] : Instr[15:12];
-    
+//    assign A3 = RegSrcMul[1] == 1'b1 ? Instr[19:16] : Instr[15:12];
+    assign A3 = (Start == 1'b1) ? Instr[19:16] : Instr[15:12];
     assign WD3 = Result;
     assign WE3 = RegWrite;
     assign R15 = PCPlus8;
@@ -267,8 +268,8 @@ module ARM(
     assign Src_B = ALUSrc == 1'b0 ? ShOut : ExtImm;
     
     // MCycle
-    assign Operand1 = RD1;
-    assign Operand2 = RD2;
+    assign Operand1 = RD2;
+    assign Operand2 = RD1;
     
     assign DPControl = Start;
     
@@ -288,7 +289,6 @@ module ARM(
     
     
 endmodule
-
 
 
 

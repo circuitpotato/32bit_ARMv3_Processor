@@ -134,7 +134,7 @@ module ARM(
     wire [3:0] MULFlag;
     wire [31:0] ALUResult;
     
-    wire [2:0] RegSrcMul;
+    wire [1:0] RegSrcMul;
     
     
     // datapath connections here

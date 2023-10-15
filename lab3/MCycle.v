@@ -35,7 +35,7 @@
 
 module MCycle
 
-    #(parameter width = 4) // Keep this at 4 to verify your algorithms with 4 bit numbers (easier). When using MCycle as a component in ARM, generic map it to 32.
+    #(parameter width = 32) // Keep this at 4 to verify your algorithms with 4 bit numbers (easier). When using MCycle as a component in ARM, generic map it to 32.
     (
         input CLK,
         input RESET, // Connect this to the reset of the ARM processor.
@@ -97,7 +97,7 @@ module MCycle
             
         end
     end 
-     
+      
     always@( state, done, Start, RESET ) begin : IDLE_PROCESS  
 		// Note : This block uses non-blocking assignments to get around an unpredictable Verilog simulation behaviour.
         // default outputs
@@ -170,7 +170,7 @@ module MCycle
                
         end    
         
-        else begin // Divide lynn 
+        else begin 
             shifted_op1 = shifted_op1 + ~shifted_op2 + 1'b1;    // (dividend  - divisor)  --> (Remainder - divisor) 
             
             if (shifted_op1[2*width-1] == 1'b1) begin   // If result is negative, 
@@ -190,7 +190,7 @@ module MCycle
             temp_sum[width-1:0] = shifted_op1_mul; //quotient
             
             
-            if (sign_op1 ^ sign_op2) begin  
+            if (sign_op1 ^ sign_op2) begin  // xor operation
                 temp_sum_signed[width-1:0] = ~temp_sum[width-1:0] + 1'b1;           // quotient calculation
                 temp_sum_signed[2*width-1:width] =  ~temp_sum[2*width-1:width] + 1'b1;           // remainder calculation 
             end 
@@ -199,7 +199,7 @@ module MCycle
                 temp_sum_signed[2*width-1:width] = temp_sum[2*width-1:width] ;      // remainder calculation
             end 
             
-        end  // lynn
+        end  
         
         // Count variable moved out of each branch.
         count = count + 1; 

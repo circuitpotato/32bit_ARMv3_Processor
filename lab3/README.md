@@ -32,7 +32,7 @@ At memory 0xC04 Switch Configurations:
 2. 1000 0000 0000 0001 = 0x00008001 -> 32 Bit Div -> Output = FFFFEEEE/0000000A = 0x199997E4
 3. 0100 0000 0000 0001 = 0x00004001 -> 32 Bit Mul -> Output = FFFFEEEE*0000000A = 0xFFFF554C	
 4. 0000 1010 0101 0001 = 0x00000A51 -> 4 Bit Mul -> Output = 0xA * 0x5 = 0x32
-5. 0000 1111 0101 0101 = 0x00000F55 -> 4 Bit Div -> Output = 0xF / 0x5 = 0x4B
+5. 0000 1111 0101 0101 = 0x00000F55 -> 4 Bit Div -> Output = 0xF / 0x5 = 0x3
 
 ####################################################################
 MCycle.v:

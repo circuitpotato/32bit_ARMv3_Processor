@@ -41,12 +41,16 @@ module test_MCycle(
     reg RESET = 0 ;
     reg Start = 0 ;
     reg [1:0] MCycleOp = 0 ;
-    reg [3:0] Operand1 = 0 ;
-    reg [3:0] Operand2 = 0 ;
+    //reg [3:0] Operand1 = 0 ;
+    //reg [3:0] Operand2 = 0 ;
+    reg [31:0] Operand1 = 0 ;
+    reg [31:0] Operand2 = 0 ;
 
     // DECLARE OUTPUT SIGNALs
-    wire [3:0] Result1 ;
-    wire [3:0] Result2 ;
+    //wire [3:0] Result1 ;
+    //wire [3:0] Result2 ;
+    wire [31:0] Result1 ;
+    wire [31:0] Result2 ;
     wire Busy ;
     
     // INSTANTIATE DEVICE/UNIT UNDER TEST (DUT/UUT)
@@ -62,131 +66,331 @@ module test_MCycle(
         Busy
         ) ;
     
+    //COMMENT OUT BASED ON NO. OF BITS TEST CASE
     // STIMULI
     initial begin
         // hold reset state for 100 ns.
+        
+        // 4 BITS TEST CASES -------------------------------------------------------------------------------------------------------------------------------------
+        //SIGNED MULTIPLICATION--------------------------------------------------------------------
+//        MCycleOp = 2'b00 ; 
+        
+//        #10 ;    
+//        Operand1 = 4'b1111 ;
+//        Operand2 = 4'b1111 ;
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b0000 ;
+//        Operand2 = 4'b1111 ;
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b1111 ;
+//        Operand2 = 4'b0000 ;   
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b1000 ;
+//        Operand2 = 4'b0111 ;   
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        //CASE TO TEST IMPROVED MULTIPLIER
+//        #10 ;
+//        Operand1 = 4'b1010 ;
+//        Operand2 = 4'b1100 ;   
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        //UNSIGNED MULTIPLICATION--------------------------------------------------------------------
+//        MCycleOp = 2'b01 ; 
+        
+//        #10 ;    
+//        Operand1 = 4'b1111 ;
+//        Operand2 = 4'b1111 ;
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b0000 ;
+//        Operand2 = 4'b1111 ;
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b1111 ;
+//        Operand2 = 4'b0000 ;   
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b1000 ;
+//        Operand2 = 4'b0111 ;   
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        //CASE TO TEST IMPROVED MULTIPLIER
+//        #10 ;
+//        Operand1 = 4'b1010 ;
+//        Operand2 = 4'b1100 ;   
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        //SIGNED DIVSION--------------------------------------------------------------------
+//        MCycleOp = 2'b10 ; 
+        
+//        #10 ;    
+//        Operand1 = 4'b1111 ;
+//        Operand2 = 4'b1111 ;
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b0000 ;
+//        Operand2 = 4'b1111 ;
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b1111 ;
+//        Operand2 = 4'b0000 ;   
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b1000 ;
+//        Operand2 = 4'b0111 ;   
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        //UNSIGNED DIVISION--------------------------------------------------------------------
+//        MCycleOp = 2'b11 ; 
+        
+//        #10 ;    
+//        Operand1 = 4'b1111 ;
+//        Operand2 = 4'b1111 ;
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b0000 ;
+//        Operand2 = 4'b1111 ;
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b1111 ;
+//        Operand2 = 4'b0000 ;   
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        
+//        #10 ;
+//        Operand1 = 4'b1000 ;
+//        Operand2 = 4'b0111 ;   
+//        Start = 1'b1;
+//        wait(Busy) ; // suspend initial block till condition becomes true  ;
+//        wait(~Busy) ;
+//        Start = 1'b0;
+        // 4 BITS TEST CASES -------------------------------------------------------------------------------------------------------------------------------------
+        
+        // 32 BITS TEST CASES -------------------------------------------------------------------------------------------------------------------------------------
+        //SIGNED MULTIPLICATION--------------------------------------------------------------------
+        MCycleOp = 2'b00 ; 
+        
         #10 ;    
-        MCycleOp = 2'b00 ; //signed mul
-        Operand1 = 4'b1111 ;
-        Operand2 = 4'b1111 ;
-        Start = 1'b1 ; // Start is asserted continously(Operations are performed back to back). To try a non-continous Start, you can uncomment the commented lines.    
-
+        Operand1 = 32'hFFFFFFFF ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
         wait(Busy) ; // suspend initial block till condition becomes true  ;
         wait(~Busy) ;
+        Start = 1'b0;
         
-        #10 ;
-        Start = 1'b0 ;
-        #10 ;
-        Operand1 = 4'b1110 ;
-        Operand2 = 4'b1111 ;
-        Start = 1'b1 ;
-        
-        wait(Busy) ; 
+        #10 ;    
+        Operand1 = 32'hFFFFFFFF ;
+        Operand2 = 32'h00000001 ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
         wait(~Busy) ;
-        #10 ;
-        Start = 1'b0 ;
-        #10 ;
-        MCycleOp = 2'b01 ; //unsigned mul
-        Operand1 = 4'b1111 ;
-        Operand2 = 4'b1111 ;
-        Start = 1'b1 ;
-
-        wait(Busy) ; 
-        wait(~Busy) ; 
-        #10 ;
-        Start = 1'b0 ;
-        #10 ;
-        Operand1 = 4'b1110 ;
-        Operand2 = 4'b1111 ;
-        Start = 1'b1 ;
-
-        wait(Busy) ; 
-        wait(~Busy) ; 
+        Start = 1'b0;
         
-        MCycleOp = 2'b11 ; //unsigned div
-        Operand1 = 4'b1111 ;
-        Operand2 = 4'b0111 ;
-        Start = 1'b1 ;
-
-        wait(Busy) ; 
-        wait(~Busy) ; 
-        #10 ;
-        Start = 1'b0 ;
-        #10 ;
-        Operand1 = 4'b1110 ;
-        Operand2 = 4'b0111 ;
-        Start = 1'b1 ;
-
-        wait(Busy) ; 
-        wait(~Busy) ; 
-        #10 ;
-        Start = 1'b0 ;
-        #10 ;
-        
-        MCycleOp = 2'b10 ; //signed div
-        Operand1 = 4'b1010 ;
-        Operand2 = 4'b0011 ;
-        Start = 1'b1 ;
-
-        wait(Busy) ; 
-        wait(~Busy) ; 
-        #10 ;
-        Start = 1'b0 ;
-        #10 ;
-
-        MCycleOp = 2'b10 ; //signed div
-        Operand1 = 4'b1010 ;
-        Operand2 = 4'b1101 ;
-        Start = 1'b1 ;
-
-        wait(Busy) ; 
-        wait(~Busy) ; 
-        #10 ;
-        Start = 1'b0 ;
-        #10 ;
-        MCycleOp = 2'b10 ;//signed div
-        Operand1 = 4'b0110 ;
-        Operand2 = 4'b1101 ;
-        Start = 1'b1 ;
-
-        wait(Busy) ; 
-        wait(~Busy) ; 
-        #10 ;
-        Start = 1'b0 ;
-        #10 ;
-        Operand1 = 4'b0110 ;
-        Operand2 = 4'b0010 ;
-        Start = 1'b1 ;
-
-        wait(Busy) ; 
-        wait(~Busy) ; 
-        
-         #10 ;
-        Start = 1'b0 ;
-        #10 ;
-        Operand1 = 4'b0111 ;
-        Operand2 = 4'b0010 ;
-        Start = 1'b1 ;
-
-        wait(Busy) ; 
+        #10 ;    
+        Operand1 = 32'h00000000 ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
         wait(~Busy) ;
+        Start = 1'b0;
         
-         #10 ;
-        Start = 1'b0 ;
-        #10 ;
-        Operand1 = 4'b1011 ;
-        Operand2 = 4'b0010 ;
-        Start = 1'b1 ;
-
-        wait(Busy) ; 
-        wait(~Busy) ; 
+        #10 ;    
+        Operand1 = 32'h00000001 ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
         
-        MCycleOp = 2'b01 ; //unsigned mul
-        Operand1 = 4'b1111 ;
-        Operand2 = 4'b1111 ;
-        wait(Busy) ; 
-        wait(~Busy) ; 
-        Start = 1'b0 ;
+        //TEST CASE FOR TO COMPARE TO IMPROVE MUL
+        #10 ;    
+        Operand1 = 32'h1234ABCD ;
+        Operand2 = 32'hFA00FA00;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+         
+        //UNSIGNED MULTIPLICATION--------------------------------------------------------------------
+        MCycleOp = 2'b01 ;
+        
+        #10 ;    
+        Operand1 = 32'hFFFFFFFF ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        
+        #10 ;    
+        Operand1 = 32'hFFFFFFFF ;
+        Operand2 = 32'h00000001 ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        
+        #10 ;    
+        Operand1 = 32'h00000000 ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        
+        #10 ;    
+        Operand1 = 32'h00000001 ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        
+        //TEST CASE FOR TO COMPARE TO IMPROVE MUL
+        #10 ;    
+        Operand1 = 32'h1234ABCD ;
+        Operand2 = 32'hFA00FA00;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+         
+        //SIGNED DIVSION--------------------------------------------------------------------
+        MCycleOp = 2'b10 ; 
+        
+        #10 ;    
+        Operand1 = 32'hFFFFFFFF ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        
+        #10 ;    
+        Operand1 = 32'hFFFFFFFF ;
+        Operand2 = 32'h00000001 ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        
+        #10 ;    
+        Operand1 = 32'h00000000 ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        
+        #10 ;    
+        Operand1 = 32'h00000001 ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+         
+        //UNSIGNED DIVISION--------------------------------------------------------------------
+        MCycleOp = 2'b11 ; 
+        
+        #10 ;    
+        Operand1 = 32'hFFFFFFFF ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        
+        #10 ;    
+        Operand1 = 32'hFFFFFFFF ;
+        Operand2 = 32'h00000001 ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        
+        #10 ;    
+        Operand1 = 32'h00000000 ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        
+        #10 ;    
+        Operand1 = 32'h00000001 ;
+        Operand2 = 32'hFFFFFFFF ;
+        Start = 1'b1;
+        wait(Busy) ; // suspend initial block till condition becomes true  ;
+        wait(~Busy) ;
+        Start = 1'b0;
+        // 32 BITS TEST CASES -------------------------------------------------------------------------------------------------------------------------------------
+        
     end
      
     // GENERATE CLOCK       
@@ -196,19 +400,3 @@ module test_MCycle(
     end
     
 endmodule
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

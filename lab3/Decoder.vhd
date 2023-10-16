@@ -51,8 +51,8 @@ entity Decoder is port(
             -- Lab 3 edit
             MULFlag     : in std_logic_vector(3 downto 0);
             Start       : out std_logic;
-            MCycleOp    : out std_logic_vector(1 downto 0);
-            RegSrcMul   : out std_logic_vector(1 downto 0) 
+            MCycleOp    : out std_logic_vector(1 downto 0)
+            
 			);
 end Decoder;
 
@@ -95,7 +95,7 @@ begin
               "00" when (Op = "00" and Start_buffer = '1') else
               "--";
     
-    Start <= Start_buffer; 
+    
         
     ALUOp <= "01" when (Op = "00") else                         -- DP instruct
              "10" when (Op = "01" and Funct(3) = '1') else      -- LDR/STR +ve offset
@@ -120,9 +120,9 @@ begin
     NoWrite <= '1' when (ALUOp = "01" and (Funct(4 downto 0) = "10101" or Funct(4 downto 0) = "10111")) else '0';
     
     --MUL Operation 
-    
+    Start <= Start_buffer; 
     Start_buffer <= '1' when (MULFlag = "1001" and Op = "00") else '0'; 
-    RegSrcMul <= "11" when Start_buffer = '1' else "00";
+    
 
     MCycleOp <= "11" when (Funct(1) = '1') else "01"; 
     

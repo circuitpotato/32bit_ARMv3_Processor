@@ -1,6 +1,8 @@
 README FOR CODES THAT WERE EDITED FOR LAB 3
 
+####################################################################
 ARM_sample.s [INSTRUCTION FOR SIMPLE MULTIPLY/DIVIDE CALCULATOR]:
+####################################################################
 Load Registers with FIXED values
 R10 = 0xFFFFEEEE, R11 = 0x0000000A, R7 = 0x00000000, R8 = 0x00000001, R9 = 0x00000011
 R4 = 0x00000C18 (7Seg Address), R5 = 0x00000C04 (DIPS Address)
@@ -32,7 +34,9 @@ At memory 0xC04 Switch Configurations:
 4. 0000 1010 0101 0001 = 0x00000A51 -> 4 Bit Mul -> Output = 0xA * 0x5 = 0x32
 5. 0000 1111 0101 0101 = 0x00000F55 -> 4 Bit Div -> Output = 0xF / 0x5 = 0x4B
 
+####################################################################
 MCycle.v:
+####################################################################
 Added Divide Functionality
 Upgraded Multiplier -> More efficient as it now looks at 2nd last and LSB before computation, initially was just LSB checked at every iteration
 
@@ -44,5 +48,16 @@ Division is carried out based on whether MCycleOp[1] being 1, here we carry our 
 
 Results as explained earlier
 
+####################################################################
 Arm.v
+####################################################################
+A1, A2, A3 Checks if it is MUL or MLA, if it is, interpret instruction for registers associated wit Op1 and Op2
+Op1 and Op2 connected to RD ports
+Result 1 is used Result2 Discarded
+Check for Start - Whether to use Mul/Mla
 
+####################################################################
+Decoder 
+####################################################################
+Start will be 1 if Instr[7:4] = 1001 for Mul/Ml and OP = 00
+MCycleOp logic to check Instr(21) if 1 is Divide, if 0 is Multiply

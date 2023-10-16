@@ -21,7 +21,7 @@
 ; ------- <code memory (ROM mapped to Instruction Memory) begins>
 ; Total number of instructions should not exceed 127 (126 excluding the last line 'halt B halt').
 		
-		LDR R10, Calc_val1		;R10 = 0xFFFFFFFF
+		LDR R10, Calc_val1		;R10 = 0xFFFFEEEE
 		LDR R11, Calc_val2		;R11 = 0x0000000A
 		LDR R6, F_Mask			;R6 = 0x0000000F
 		LDR R7, ZERO 			;R7 = 0x00000000
@@ -60,23 +60,13 @@ MAIN
 		BNE FourBitMul
 
 ThirtyTwoBitMul
-		;DEBUG
-		;ADD R1, R10, R11			;ADD: FFFFFFFF + 0000000A
-		;STR R1, [R4]				;7seg = 0x00000009
-		;;;;;
-		
-		MUL R1, R10, R11			;Multiply: FFFFFFFF * 0000000A
-		STR R1, [R4]				;7seg = 0xFFFFFFF6
+		MUL R1, R10, R11			;Multiply: FFFFEEEE * 0000000A
+		STR R1, [R4]				;7seg = 0xFFFF554C
 		B Reset
 		
 ThirtyTwoBitDiv
-		;DEBUG
-		;SUB R1, R10, R11			;SUB: FFFFFFFF + 0000000A
-		;STR R1, [R4]				;7seg = 0xFFFFFFF5
-		;;;;;
-		
-		MLA R1, R10, R11, R7		;Divide: FFFFFFFF * 0000000A
-		STR R1, [R4]				;7seg = 0x19999999
+		MLA R1, R10, R11, R7		;Divide: FFFFEEEE * 0000000A
+		STR R1, [R4]				;7seg = 0x199997E4
 		B Reset
 
 FourBitMul
@@ -84,10 +74,6 @@ FourBitMul
 		AND R1, R6					;Make 4-bit Operand 0x0000(Operand1)
 		LSR R12, R2, #4				;Shift SW7 to SW4 to LSB - Operand 2
 		AND R12, R6					;Make 4-bit Operand 0x0000(Operand2)
-		;Debug
-		;ADD R3, R1, R12				;1010 + 0101 = 1111
-		;;;;;
-		
 		MUL R3, R1, R12				;Multiply and Store in R0
 		STR R3, [R4]				;Display Result in 7seg
 		B Reset
@@ -97,10 +83,6 @@ FourBitDiv
 		AND R1, R6					;Make 4-bit Operand 0x0000(Operand1)
 		LSR R12, R2, #4				;Shift SW7 to SW4 to LSB - Operand 2
 		AND R12, R6					;Make 4-bit Operand 0x0000(Operand2)
-		;Debug
-		;SUB R3, R1, R12				;1111 - 0101 = 1010
-		;;;;;
-		
 		MLA R3, R1, R12, R7			;Divide and Store in R0
 		STR R3, [R4]				;Display Result in 7seg
 		B Reset
@@ -156,10 +138,6 @@ ZERO
 		DCD 0x00000000		; constant 0
 F_Mask
 		DCD 0x0000000F		; Bit Mask -> Last 4 Bits = 1111
-;Calc_val1
-;		DCD 0xFFFFFFFF
-
-;DEBUG
 Calc_val1
 		DCD 0xFFFFEEEE
 

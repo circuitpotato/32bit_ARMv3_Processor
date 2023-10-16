@@ -34,7 +34,7 @@
 
 module MCycle
 
-    #(parameter width = 32) // Keep this at 4 to verify your algorithms with 4 bit numbers (easier). When using MCycle as a component in ARM, generic map it to 32.
+    #(parameter width = 4) // Keep this at 4 to verify your algorithms with 4 bit numbers (easier). When using MCycle as a component in ARM, generic map it to 32.
     (
         input CLK,
         input RESET, // Connect this to the reset of the ARM processor.
@@ -135,8 +135,7 @@ module MCycle
             
             else begin
             shifted_op1 = { {width{~MCycleOp[0] & Operand1[width-1]}}, Operand1 } ; // sign extend the operand
-            shifted_op2 = { {
-            width{~MCycleOp[0] & Operand2[width-1]}}, Operand2 } ; 
+            shifted_op2 = { {width{~MCycleOp[0] & Operand2[width-1]}}, Operand2 } ; 
             end
         end 
         
@@ -147,12 +146,12 @@ module MCycle
             if (MCycleOp[1] == 0) begin
                 if (shifted_op1[width-1] == 1) begin 
                     Neg_Op1 = 1;
-                    shifted_op1 = ~(shifted_op1 - 1);                              //Negating Op1 - 2's Complement by -1 from original, Flip Op1             
+                    shifted_op1 = ~(shifted_op1 - 1);                              //Converting NEG to POS Op1 - 2's Complement by -1 from original, Flip Op1             
                     Div_signed = 1;
                 end
                 if (shifted_op2[width-1] == 1) begin 
                     Neg_Op2 = 1;
-                    shifted_op2 = ~(shifted_op2 - 1);                              //Negating Op2 - 2's Complement by -1 from original, Flip Op2                 
+                    shifted_op2 = ~(shifted_op2 - 1);                              //Converting NEG to POS Op2 - 2's Complement by -1 from original, Flip Op2                 
                     Div_signed = 1;
                 end
             end    
@@ -160,13 +159,13 @@ module MCycle
             else begin
                 if (shifted_op1[width-1] == 1) begin                           //Op1 Dividend
                     Neg_Op1 = 1;
-                    shifted_op1 = shifted_op1 - 1;                              //Negating Op1 - 2's Complement by -1 from original  (will flip in next step)
+                    shifted_op1 = shifted_op1 - 1;                              //Converting NEG to POS Op1 - 2's Complement by -1 from original  (will flip in next step)
                     shifted_op1 = { {width{1'b0}}, ~shifted_op1[width-1:0] };   //Flip Op1 (2's Complement), 0000...Dividend bits                      
                     Div_signed = 1;
                 end
                 if (shifted_op2[width-1] == 1) begin                           //Op2 Divisor NEG
                     Neg_Op2 = 1;
-                    shifted_op2 = shifted_op2 - 1;                             //Negating Op2 - 2's Complement by -1 from original (will flip in next step)
+                    shifted_op2 = shifted_op2 - 1;                             //Converting NEG to POS Op2 - 2's Complement by -1 from original (will flip in next step)
                     shifted_op2 = { ~shifted_op2[width-1:0], {width{1'b0}} };  //Flip Op2 (2's Complement), Divisor bits...0000
                     Div_signed = 1;
                 end
@@ -221,7 +220,7 @@ module MCycle
         
         //Division--------------------------------------------------------------------------------------------------------------
         else if (MCycleOp[0] | Div_signed) begin
-            //When Dividend < Divisor -> Quotient is 0, Remainder(Divident) does not change till Division is carried out
+            //When Dividend < Divisor -> Quotient is 0, Remainder(Dividend) does not change till Division is carried out
             if (shifted_op1 < shifted_op2) begin                          
                 //Remainder
                 temp_sum[2*width-1 : width] = shifted_op1[width-1 : 0];    
@@ -246,18 +245,19 @@ module MCycle
                 shifted_op2 = { 1'b0, shifted_op2[2*width-1 : 1] };     //Divisor Shift Right
             end
         end
-        //Results--------------------------------------------------------------------------------------------------------------
-        //Logic here is: Negate result if Operands were of Different Signs
-        if (Neg_Op1 != Neg_Op2) begin
-            Result2 = ~temp_sum[2*width-1 : width] + 1;
-            Result1 = ~temp_sum[width-1 : 0] + 1 ;
-        end
-        else begin
-            Result2 = temp_sum[2*width-1 : width] ;
-            Result1 = temp_sum[width-1 : 0] ;
-        end   
     end
-   
+    always @ (*) begin
+                //Results--------------------------------------------------------------------------------------------------------------
+            //Logic here is: Negate result if Operands were of Different Signs
+            if (Neg_Op1 != Neg_Op2) begin
+                Result2 = ~temp_sum[2*width-1 : width] + 1;
+                Result1 = ~temp_sum[width-1 : 0] + 1 ;
+            end
+            else begin
+                Result2 = temp_sum[2*width-1 : width] ;
+                Result1 = temp_sum[width-1 : 0] ;
+            end   
+    end
 endmodule
 
 

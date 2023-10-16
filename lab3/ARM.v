@@ -192,8 +192,7 @@ module ARM(
                     //Introduced for Lab 3
                     MULFlag,
                     Start,
-                    MCycleOp,
-                    RegSrcMul
+                    MCycleOp
                 );
                                 
     // Instantiate CondLogic
@@ -230,8 +229,11 @@ module ARM(
                 
     assign PCPlus4 = PC + 3'b100;
     assign PCPlus8 = PCPlus4 + 3'b100;
-    // Allows the PC to be stalled while multiplication takes place.
-    assign WE_PC = ~Busy;
+    
+    assign WE_PC = ~Busy;   // Allows the PC to be stalled while multiplication takes place.
+                            // 'Busy' can be used as the write enable for the PC. 
+                            // This will stall the processor until the multicycle operation is complete.
+                            
     assign PC_IN = PCSrc == 1'b1 ? Result : PCPlus4;
     // Instantiate ProgramCounter    
     ProgramCounter ProgramCounter1(

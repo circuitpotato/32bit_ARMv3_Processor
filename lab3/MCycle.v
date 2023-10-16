@@ -135,42 +135,39 @@ module MCycle
             
             else begin
             shifted_op1 = { {width{~MCycleOp[0] & Operand1[width-1]}}, Operand1 } ; // sign extend the operand
-            shifted_op2 = { {
-            width{~MCycleOp[0] & Operand2[width-1]}}, Operand2 } ; 
+            shifted_op2 = { {width{~MCycleOp[0] & Operand2[width-1]}}, Operand2 } ; 
             end
-          
         end 
         
         //Pre Processing---------------------------------------------------------------------------------------------------------------------
         //Slide 24 - Conversion of Negative Operands to Positives before division -> Negate Result if Orignal Operands Different signs
-        else if (MCycleOp[0]==0) begin                       // check if signed operation and pre-processing not done
+        else if ( ~MCycleOp[0] & !Div_signed ) begin                       //Check if Sign Division Selected -> Serves as intermediate step for Sign Div
             //FOR MULTIPLICATION
             if (MCycleOp[1] == 0) begin
-                if (shifted_op1[width-1] == 1) begin                               // check for sign bit of op1
+                if (shifted_op1[width-1] == 1) begin 
                     Neg_Op1 = 1;
-                    shifted_op1 = ~(shifted_op1 - 1);                              //Convert Neg to Pos Op1 - 2's Complement by -1 from original, Flip Op1             
-                    
+                    shifted_op1 = ~(shifted_op1 - 1);                              //Converting NEG to POS Op1 - 2's Complement by -1 from original, Flip Op1             
+                    Div_signed = 1;
                 end
-                if (shifted_op2[width-1] == 1) begin                               // check for sign bit op2
+                if (shifted_op2[width-1] == 1) begin 
                     Neg_Op2 = 1;
-                    shifted_op2 = ~(shifted_op2 - 1);                              //Convert Neg to Pos Op2 - 2's Complement by -1 from original, Flip Op2                 
-                    
+                    shifted_op2 = ~(shifted_op2 - 1);                              //Converting NEG to POS Op2 - 2's Complement by -1 from original, Flip Op2                 
+                    Div_signed = 1;
                 end
             end    
-            
             //FOR DIVISION
             else begin
-                if (shifted_op1[width-1] == 1) begin                           // check for sign bit for op1
+                if (shifted_op1[width-1] == 1) begin                           //Op1 Dividend
                     Neg_Op1 = 1;
-                    shifted_op1 = shifted_op1 - 1;                              //Convert Neg to Pos Op1 - 2's Complement by -1 from original  (will flip in next step)
+                    shifted_op1 = shifted_op1 - 1;                              //Converting NEG to POS Op1 - 2's Complement by -1 from original  (will flip in next step)
                     shifted_op1 = { {width{1'b0}}, ~shifted_op1[width-1:0] };   //Flip Op1 (2's Complement), 0000...Dividend bits                      
-                    
+                    Div_signed = 1;
                 end
-                if (shifted_op2[width-1] == 1) begin                           // check for sign bit op2
+                if (shifted_op2[width-1] == 1) begin                           //Op2 Divisor NEG
                     Neg_Op2 = 1;
-                    shifted_op2 = shifted_op2 - 1;                             //Convert Neg to Pos Op2 - 2's Complement by -1 from original (will flip in next step)
+                    shifted_op2 = shifted_op2 - 1;                             //Converting NEG to POS Op2 - 2's Complement by -1 from original (will flip in next step)
                     shifted_op2 = { ~shifted_op2[width-1:0], {width{1'b0}} };  //Flip Op2 (2's Complement), Divisor bits...0000
-                    
+                    Div_signed = 1;
                 end
                 else begin 
                     shifted_op2 = { Operand2, {width{1'b0}} };                 //Op2 Divisor POS Divisor bits...0000
@@ -201,7 +198,7 @@ module MCycle
 //        end    
           
           //NEW MULTIPLIER USING COMBINATIONAL LOGIC TO CONSIDER 2 LSB WORTH OF MULTIPLIER
-        else if( MCycleOp[1] == 0) begin // Multiply
+        else if( ~MCycleOp[1] ) begin // Multiply
             //Update Values from Combinational Circuit
             shifted_op1 <= next_operand1;
             shifted_op2 <= next_operand2;
@@ -210,59 +207,55 @@ module MCycle
             done <= !(next_operand1 && next_operand2);
             //when not done -> flags are not cleared, once done -> flags cleared
             if (!done) begin
-                
+                Div_signed <= Div_signed;
                 Neg_Op1 <= Neg_Op1;
                 Neg_Op2 <= Neg_Op2;
             end
             else begin
-                
+                Div_signed <= 0;
                 Neg_Op1 <= 0;
                 Neg_Op2 <= 0;
             end
         end
         
         //Division--------------------------------------------------------------------------------------------------------------
-        else if (MCycleOp[1] == 1 ) begin   // check if division or signed
-            //When Dividend < Divisor -> Quotient is 0, Remainder(Divident) does not change till Division is carried out
+        else if (MCycleOp[0] | Div_signed) begin
+            //When Dividend < Divisor -> Quotient is 0, Remainder(Dividend) does not change till Division is carried out
             if (shifted_op1 < shifted_op2) begin                          
                 //Remainder
-                temp_sum[2*width-1 : width] = shifted_op1[width-1 : 0];    // no change in dividend/remainder
+                temp_sum[2*width-1 : width] = shifted_op1[width-1 : 0];    
                 //Quotient - Shift left logic 0
-                temp_sum[width-1 : 0] = {temp_sum[width-2 : 0], 1'b0};     // quotient = 0 
+                temp_sum[width-1 : 0] = {temp_sum[width-2 : 0], 1'b0};     
             end
             else begin                                                    
                 //Once shifted_op2 aka Divisor Becomes Smaller or equal, do real division take place and Quotient =1  and Remainder changes
                 shifted_op1 = shifted_op1 - shifted_op2;                  //Remainder - Divisor
                 temp_sum[2*width-1: width] = shifted_op1[width-1 : 0];    //Store the above result into temp, Represent new 'Remainder' aka dividend
-                temp_sum[width-1 : 0] = {temp_sum[width-2 : 0], 1'b1};    //Quotient = 1 
+                temp_sum[width-1 : 0] = {temp_sum[width-2 : 0], 1'b1};    //Quotient Shift left logic 1
             end
             
             if (count == width) begin       //Flags reset at end of cycle
                 done <= 1'b1;
                 Neg_Op1 <= 0;
                 Neg_Op2 <= 0;
-              
+                Div_signed <= 0;
             end
             else begin
                 count = count + 1;
                 shifted_op2 = { 1'b0, shifted_op2[2*width-1 : 1] };     //Divisor Shift Right
             end
         end
-
     end
-
     always @ (*) begin
-        //Results--------------------------------------------------------------------------------------------------------------
-        //Logic here is: Negate result if Operands were of Different Signs   
-        if (Neg_Op1 != Neg_Op2) begin
-            Result2 = ~temp_sum[2*width-1 : width] + 1;
-            Result1 = ~temp_sum[width-1 : 0] + 1 ;
-        end
-        else begin
-            Result2 = temp_sum[2*width-1 : width] ;
-            Result1 = temp_sum[width-1 : 0] ;
-        end   
+                //Results--------------------------------------------------------------------------------------------------------------
+            //Logic here is: Negate result if Operands were of Different Signs
+            if (Neg_Op1 != Neg_Op2) begin
+                Result2 = ~temp_sum[2*width-1 : width] + 1;
+                Result1 = ~temp_sum[width-1 : 0] + 1 ;
+            end
+            else begin
+                Result2 = temp_sum[2*width-1 : width] ;
+                Result1 = temp_sum[width-1 : 0] ;
+            end   
     end
-
 endmodule
-

@@ -42,19 +42,19 @@ module test_Wrapper #(
     initial
     begin
 
-        DIP <= 32'hC001; #10000;   
+        DIP <= 32'hC001; #10000;   // -> Should not execute anything as it is illegal
         DIP <= 32'h0000; #1000;
 
-        DIP <= 32'h8001; #10000;  
+        DIP <= 32'h8001; #10000;  // -> 32 Bit Div -> Output = FFFFEEEE/0000000A = 0x199997E4
         DIP <= 32'h0000; #1000;    
 
-        DIP <= 32'h4001; #10000;    
+        DIP <= 32'h4001; #10000;  // -> 32 Bit Mul -> Output = FFFFEEEE*0000000A = 0xFFFF554C   
         DIP <= 32'h0000; #1000;  
 
-        DIP <= 32'h0A51; #10000;    
+        DIP <= 32'h0A51; #10000;  // -> 4 Bit Mul -> Output = 0xA * 0x5 = 0x32
         DIP <= 32'h0000; #1000;
 
-        DIP <= 32'h0F55; #10000; 
+        DIP <= 32'h0F55; #10000;  // -> 4 Bit Div -> Output = 0xF / 0x5 = 0x3
         DIP <= 32'h0000; #1000;
 
 

@@ -1,5 +1,5 @@
 
-**Correct Output on 7Seg**
+#Correct Output
 0x00000008
 0x00000002
 0x00000007

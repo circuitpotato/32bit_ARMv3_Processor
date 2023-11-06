@@ -3,9 +3,9 @@
 // Company: 
 // Engineer: 
 // 
-// Create Date: 10/26/2021 06:47:51 PM
+// Create Date: 11/03/2023 08:40:50 PM
 // Design Name: 
-// Module Name: 2LBranchPredictor
+// Module Name: Branch_Predictor
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -85,7 +85,7 @@ module Branch_Predictor
         enable[PCE_truncated] <= Branch_mispredict;
         
         
-        // Shift to reflect history
+        // reflect the history
         BHT[PCE_truncated] <= PCSrcE;
         if (BTA_mispredict) begin
             BTB[PCE_truncated] <= ALUResultE;

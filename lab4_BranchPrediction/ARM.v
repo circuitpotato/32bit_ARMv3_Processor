@@ -42,7 +42,6 @@
 module ARM(
     input CLK,
     input RESET,
-    //input Interrupt,  // for optional future use
     input [31:0] InstrF,
     input [31:0] ReadData,
     output reg MemWriteM,
@@ -56,14 +55,13 @@ module ARM(
 
   
     // RegFile 
-    //wire CLK ;
     wire WE3 ;
     wire [31:0] WD3 ;
     wire [31:0] R15 ;
     wire [31:0] RD1D ;
     wire [31:0] RD2D ;
     
-    // Extend Module 
+    // Extend  
     wire [1:0] ImmSrc ;
     wire [23:0] InstrImm ;
     wire [31:0] ExtImmD ;
@@ -257,7 +255,7 @@ module ARM(
         end
     end
     
-    // ALU
+    // forwarding
     assign SrcAE = 
         ForwardAE == 2'b00 ? RD1E:
         ForwardAE == 2'b01 ? ResultW:
@@ -283,7 +281,7 @@ module ARM(
     assign Shamt5D = InstrD[11:7]; 
     assign ShD = InstrD[6:5];
    
-    // E-M pipeline stage
+    // Execute to Memory 
     always @ (posedge CLK) begin
         // PCSrcM <= PCSrcE;
         RegWriteM <= RegWriteE;

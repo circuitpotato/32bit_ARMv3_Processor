@@ -55,7 +55,7 @@ module ARM(
 	wire [31:0] PC_Prev;
 
   
-    // RegFile signals
+    // RegFile 
     //wire CLK ;
     wire WE3 ;
     wire [31:0] WD3 ;
@@ -63,40 +63,29 @@ module ARM(
     wire [31:0] RD1D ;
     wire [31:0] RD2D ;
     
-    // Extend Module signals
+    // Extend Module 
     wire [1:0] ImmSrc ;
     wire [23:0] InstrImm ;
     wire [31:0] ExtImmD ;
     
-    // Decoder signals
-    wire [3:0] Rd ;
-    wire [1:0] Op ;
-    wire [5:0] Funct ;
-    //wire PCS ;
-    //wire RegW ;
-    //wire MemW ;
-    wire MemtoRegD ;
-    wire ALUSrcD ;
-    //wire [1:0] ImmSrc ;
-    wire [1:0] RegSrcD ;
-    //wire NoWrite ;
-    //wire [1:0] ALUControl ;
-    //wire [1:0] FlagW ;
-    
-    // CondLogic signals
-    //wire CLK ;
+    // CondLogic 
     wire PCSD ;
     wire RegWD ;
     wire NoWriteD ;
     wire MemWD ;
     wire [1:0] FlagWD ;
     wire [3:0] CondD ;
-    //wire [3:0] ALUFlags,
-    //wire MemWrite
     wire C_Flag ;
-
+    
+    // Decoder 
+    wire [3:0] Rd ;
+    wire [1:0] Op ;
+    wire [5:0] Funct ;
+    wire MemtoRegD ;
+    wire ALUSrcD ;
+    wire [1:0] RegSrcD ;
        
-    // Shifter signals
+    // Shifter 
     wire [1:0] ShD ;
     reg [1:0] ShE;
     wire [4:0] Shamt5D ;
@@ -104,25 +93,22 @@ module ARM(
     wire [31:0] ShOut ;
     
     
-    // ALU signals
+    // ALU 
     wire [3:0] ALUControlD ;
     wire [3:0] ALUFlags ;
     
-    // ProgramCounter signals
-    //wire CLK ;
-    //wire RESET ;
+    // ProgramCounter 
     wire WE_PC ;    
     wire [31:0] PC_IN ;
-    //wire [31:0] PC ; 
         
     
     //Pipelining
     wire StallF;
-    // From F to D
+    // F to D
     wire FlushD;
     wire StallD;
     
-    // From D to E
+    // D to E
     reg PCSE = 1'b0;
     reg RegWE = 1'b0;
     reg MemWE = 1'b0;
@@ -150,7 +136,7 @@ module ARM(
 
     
     
-    // From E to M
+    // E to M
     reg PCSrcM = 1'b0;
     reg RegWriteM = 1'b0;
     reg MemtoRegM = 1'b0;
@@ -158,7 +144,7 @@ module ARM(
     reg [31:0] WriteDataM = 1'b0;
     wire ForwardM;
     
-    // From M to W
+    // M to W
     reg PCSrcW = 1'b0;
     reg RegWriteW = 1'b0;
     reg MemtoRegW = 1'b0;
@@ -167,7 +153,7 @@ module ARM(
     reg [3:0] WA3W = 1'b0;
     wire [31:0] ResultW;
     
-    // Branch Prediction Signals
+    // Branch Prediction 
     wire [31:0] PrALUResultF;
     reg [31:0] PrALUResultD = 1'b0;
     reg [31:0] PrALUResultE = 1'b0;
@@ -187,7 +173,8 @@ module ARM(
     wire Branch_mispredict;
     wire BranchAcceptF;
     reg BranchAcceptD = 1'b0;
-    // Additional Hazard unit input signals
+    
+    // Hazard unit input 
     wire [3:0] RA1D;
     wire [3:0] RA2D;
     reg [3:0] RA1E = 1'b0;
@@ -196,7 +183,7 @@ module ARM(
     wire FlushD_H;
     wire FlushE_H;
     
-    // F-D pipeline stage
+    // F-D pipeline 
     always @ (posedge CLK) begin
         if (FlushD) begin
             InstrD <= 1'b0;
@@ -218,7 +205,7 @@ module ARM(
     
     
     
-    // D-E pipeline stage
+    // D-E pipeline 
     always @ (posedge CLK) begin
         if (FlushE) begin
             
@@ -239,6 +226,7 @@ module ARM(
             RA1E <= 1'b0;
             RA2E <= 1'b0;
             Shamt5E <= 1'b0;
+            
             PrPCSrcE <= 1'b0;
             PrALUResultE <= 1'b0;
             PCE <= 1'b0;
@@ -262,6 +250,7 @@ module ARM(
             RA1E <= RA1D;
             RA2E <= RA2D;
             Shamt5E <= Shamt5D;
+            
             PrPCSrcE <= PrPCSrcD;
             PrALUResultE <= PrALUResultD;
             PCE <= PCD;
@@ -474,13 +463,15 @@ module ARM(
     assign BTA_mispredict = PCSrcE && (ALUResultE != PrALUResultE);
     assign Branch_mispredict = PCSrcE ^ PrPCSrcE;
 
-    // Modified for Branch Prediction
+    // Modified flushes for Branch Prediction
     assign FlushD = BTA_mispredict || Branch_mispredict;
     assign FlushE = BTA_mispredict || Branch_mispredict;
 
+// original Flushes
 //    assign FlushD = FlushD_H;
 //    assign FlushE = FlushE_H;
     
+    // more branch predict
     assign BranchAcceptF = !(BTA_mispredict || Branch_mispredict);
     
     

@@ -109,6 +109,16 @@ module ARM(
     wire StallD;
     
     // D to E
+    wire RegWriteE;
+    wire MemWriteE;
+    wire FlushE;
+    wire [31:0] SrcAE;
+    wire [31:0] SrcBE;
+    wire [1:0] ForwardAE;
+    wire [1:0] ForwardBE;
+    wire [31:0] WriteDataE;
+    wire [31:0] ALUResultE;    
+    wire PCSrcE;
     reg PCSE = 1'b0;
     reg RegWE = 1'b0;
     reg MemWE = 1'b0;
@@ -123,17 +133,6 @@ module ARM(
     reg [3:0] WA3E = 1'b0;
     reg [31:0] ExtImmE = 1'b0;
     reg [4:0] Shamt5E = 1'b0;
-    wire RegWriteE;
-    wire MemWriteE;
-    wire FlushE;
-    wire [31:0] SrcAE;
-    wire [31:0] SrcBE;
-    wire [1:0] ForwardAE;
-    wire [1:0] ForwardBE;
-    wire [31:0] WriteDataE;
-    wire [31:0] ALUResultE;    
-    wire PCSrcE;
-
     
     
     // E to M
@@ -183,7 +182,7 @@ module ARM(
     wire FlushD_H;
     wire FlushE_H;
     
-    // F-D pipeline 
+    // Fetch to Decode  
     always @ (posedge CLK) begin
         if (FlushD) begin
             InstrD <= 1'b0;
@@ -205,7 +204,7 @@ module ARM(
     
     
     
-    // D-E pipeline 
+    // Decode to Execute
     always @ (posedge CLK) begin
         if (FlushE) begin
             
@@ -308,7 +307,7 @@ module ARM(
     assign ResultW = (MemtoRegW == 1'b1) ? ReadDataW : ALUResultW;
     
     // datapath connections here
-    assign WE_PC = !StallF ; // Will need to control it for multi-cycle operations (Multiplication, Division) and/or Pipelining with hazard hardware.
+    assign WE_PC = !StallF ; 
 
 
     
@@ -426,6 +425,8 @@ module ARM(
     );
                 
     assign PCPlus4F = PCF + 3'b100;
+    
+    // original
     // assign PCPlus8 = PCPlus4F + 3'b100;
     
     // Instantiate ProgramCounter    
@@ -463,23 +464,25 @@ module ARM(
     assign BTA_mispredict = PCSrcE && (ALUResultE != PrALUResultE);
     assign Branch_mispredict = PCSrcE ^ PrPCSrcE;
 
+// original Flushes
+//    assign FlushD = FlushD_H;
+//    assign FlushE = FlushE_H;
+
     // Modified flushes for Branch Prediction
     assign FlushD = BTA_mispredict || Branch_mispredict;
     assign FlushE = BTA_mispredict || Branch_mispredict;
 
-// original Flushes
-//    assign FlushD = FlushD_H;
-//    assign FlushE = FlushE_H;
-    
-    // more branch predict
-    assign BranchAcceptF = !(BTA_mispredict || Branch_mispredict);
-    
-    
     assign PC_IN = (BTA_mispredict || Branch_mispredict) ? 
                    // Load the carried instruction.
                    (!PCSrcE) ?  PCPlus4E : ALUResultE :
                    // Else, load predicted instruction.
                    (PrPCSrcF) ? PrALUResultF : PCPlus4F;
+    
+    // more branch predict stuff
+    assign BranchAcceptF = !(BTA_mispredict || Branch_mispredict);
+    
+    
+
 
     assign PC_Prev = PC_IN;
     

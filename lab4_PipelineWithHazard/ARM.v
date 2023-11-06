@@ -48,55 +48,45 @@ module ARM(
     output reg MemWriteM,
     output [31:0] PCF,
     output reg [31:0] ALUResultM,
-    output [31:0] WriteData,
-    output reg [31:0] InstrD,
-	output reg[31:0] RD1E,
-	output [31:0] ResultW,
-	output [31:0] PC_Prev
+    output [31:0] WriteData
     );
     
-    // RegFile signals
-    //wire CLK ;
+    reg [31:0] InstrD;
+	reg[31:0] RD1E;
+	wire [31:0] ResultW;
+	wire [31:0] PC_Prev;
+    
+    // RegFile 
     wire WE3 ;
     wire [31:0] WD3 ;
     wire [31:0] R15 ;
     wire [31:0] RD1D ;
     wire [31:0] RD2D ;
     
-    // Extend Module signals
+    // Extend 
     wire [1:0] ImmSrc ;
     wire [23:0] InstrImm ;
     wire [31:0] ExtImmD ;
     
-    // Decoder signals
+    // Decoder 
     wire [3:0] Rd ;
     wire [1:0] Op ;
     wire [5:0] Funct ;
-    //wire PCS ;
-    //wire RegW ;
-    //wire MemW ;
     wire MemtoRegD ;
     wire ALUSrcD ;
-    //wire [1:0] ImmSrc ;
     wire [1:0] RegSrcD ;
-    //wire NoWrite ;
-    //wire [1:0] ALUControl ;
-    //wire [1:0] FlagW ;
     
-    // CondLogic signals
-    //wire CLK ;
+    // CondLogic 
     wire PCSD ;
     wire RegWD ;
     wire NoWriteD ;
     wire MemWD ;
     wire [1:0] FlagWD ;
     wire [3:0] CondD ;
-    //wire [3:0] ALUFlags,
-    //wire MemWrite
     wire C_Flag ;
 
        
-    // Shifter signals
+    // Shifter 
     wire [1:0] ShD ;
     reg [1:0] ShE;
     wire [4:0] Shamt5D ;
@@ -104,25 +94,18 @@ module ARM(
     wire [31:0] ShOut ;
     
     
-    // ALU signals
+    // ALU 
     wire [3:0] ALUControlD ;
     wire [3:0] ALUFlags ;
     
-    // ProgramCounter signals
-    //wire CLK ;
-    //wire RESET ;
+    // ProgramCounter 
     wire WE_PC ;    
     wire [31:0] PC_IN ;
-    //wire [31:0] PC ; 
         
     
-    //Pipelining
-    wire StallF;
-    // From F to D
-    wire FlushD;
-    wire StallD;
+
     
-    // From D to E
+    // D to E
     reg PCSE = 1'b0;
     reg RegWE = 1'b0;
     reg MemWE = 1'b0;
@@ -148,27 +131,31 @@ module ARM(
     wire [31:0] ALUResultE;    
     wire PCSrcE;
 
-    
-    
-    // From E to M
+    // E to M
     reg PCSrcM = 1'b0;
     reg RegWriteM = 1'b0;
     reg MemtoRegM = 1'b0;
     reg [3:0] WA3M = 1'b0;
     reg [31:0] WriteDataM = 1'b0;
     wire ForwardM;
-    
-    // From M to W
+
+    // M to W
     reg PCSrcW = 1'b0;
     reg RegWriteW = 1'b0;
     reg MemtoRegW = 1'b0;
     reg [31:0] ReadDataW = 1'b0;
     reg [31:0] ALUResultW = 1'b0;
     reg [3:0] WA3W = 1'b0;
-    //wire [31:0] ResultW;
+
+    // Pipelining
+    wire StallF;
     
-    // Branch Prediction Signals
+    // F to D
+    wire FlushD;
+    wire StallD;
     
+    
+    // Branch Prediction   
     reg [31:0] PCD = 1'b0;
     reg [31:0] PCE = 1'b0;
     
@@ -180,7 +167,6 @@ module ARM(
     wire WE_PrPCSrc;
 
     reg BranchAcceptD = 1'b0;
-    // Additional Hazard unit input signals
     wire [3:0] RA1D;
     wire [3:0] RA2D;
     reg [3:0] RA1E = 1'b0;
@@ -189,7 +175,7 @@ module ARM(
     wire FlushD_H;
     wire FlushE_H;
     
-    // F-D pipeline stage
+    // Fetch to Decode  
     always @ (posedge CLK) begin
         if (FlushD) begin
             InstrD <= 1'b0;
@@ -206,8 +192,7 @@ module ARM(
     end 
     
     
-    
-    // D-E pipeline stage
+    // Decode to Execute  
     always @ (posedge CLK) begin
         if (FlushE) begin
             
@@ -254,7 +239,7 @@ module ARM(
         end
     end
     
-    // ALU
+    // forwarding
     assign SrcAE = 
         ForwardAE == 2'b00 ? RD1E:
         ForwardAE == 2'b01 ? ResultW:
@@ -280,7 +265,7 @@ module ARM(
     assign Shamt5D = InstrD[11:7]; 
     assign ShD = InstrD[6:5];
    
-    // E-M pipeline stage
+    // Execute to Memory
     always @ (posedge CLK) begin
         // PCSrcM <= PCSrcE;
         RegWriteM <= RegWriteE;

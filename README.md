@@ -16,7 +16,7 @@
 ## Lab 3
 - Very basic multiplier
 
-## Lab 4
+## Group Project 
 - Expanded ARM Processor supporting 16 Data Processing instructions --> See Section "A3.4 Data processing instructions" in page A3-9 to A3-11 (page 75) of ARM Architecture Reference Manual for the details of the instructions.
 - Involves very simple Branch Prediction
 - 5 stage Pipeline (with Control hazards)
